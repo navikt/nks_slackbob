@@ -27,5 +27,6 @@ repos:
         additional_dependencies: [
           'pydantic',
           'pydantic_settings',
+          'pytest',
           'slack-bolt',
         ]
