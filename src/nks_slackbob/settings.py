@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     app_token: SecretStr
     """Slack app token"""
 
-    id: str = "A075RP88EV8"
+    id: str = "A07JWHE9458"
     """Slack app id til boten"""
 
     kbs_endpoint: HttpUrl = Url("http://nks-kbs")
