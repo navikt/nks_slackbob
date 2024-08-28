@@ -2,6 +2,7 @@
 
 import functools
 import logging
+import random
 import re
 
 import httpx
@@ -9,6 +10,7 @@ from slack_bolt import App
 from slack_sdk import WebClient
 
 from . import settings
+from .expressions import WORKING_ON_ANSWER
 from .utils import USERNAME_PATTERN, convert_msg, is_bob_alive, strip_msg
 
 API_URL = httpx.URL(str(settings.kbs_endpoint))
@@ -28,7 +30,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     chat_hist = client.conversations_replies(channel=event["channel"], ts=thread)
     # Start med å svare at vi jobber med et svar til bruker
     temp_msg = client.chat_postMessage(
-        text="Kontakter kunnskapsbasen :robot_face:",
+        text=random.choice(WORKING_ON_ANSWER),
         channel=event["channel"],
         thread_ts=event["ts"],
     )
@@ -42,7 +44,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     )
     # Sjekk tidlig om API-et kjører, slik at bruker slipper å vente
     if not is_bob_alive(API_URL):
-        update_msg(text="Kunnskapsbasen kjører ikke akkurat nå :wrench:")
+        update_msg(text="Kunnskapsbasen kjører ikke akkurat nå :construction:")
         return
     # Hent ut chat historikk og spørsmål fra brukeren
     history = [convert_msg(msg) for msg in chat_hist.get("messages")[:-1]]  # type: ignore[index]
