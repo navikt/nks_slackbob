@@ -49,10 +49,10 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     # Hent ut chat historikk og spørsmål fra brukeren
     history = [convert_msg(msg) for msg in chat_hist.get("messages")[:-1]]  # type: ignore[index]
     question = strip_msg(event["text"])
-    # Send spørsmål til NKS DS API
+    # Send spørsmål til NKS KBS
     try:
         reply = httpx.post(
-            API_URL.copy_with(path="/chat"),
+            API_URL.copy_with(path="/api/v1/chat"),
             json={"history": history, "question": question},
             timeout=settings.answer_timeout,
         )
