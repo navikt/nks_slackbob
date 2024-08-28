@@ -1,7 +1,6 @@
 """Hjelpefunksjoner som gjør livet enklere i møte med Slack."""
 
 import re
-from typing import Any
 
 import httpx
 
@@ -35,13 +34,10 @@ def strip_msg(msg: str) -> str:
 
 def convert_msg(slack_msg: dict[str, str]) -> dict[str, str]:
     """Hjelpemetode som tar inn en Slack melding og konverterer til NKS KBS format."""
-    result: dict[str, Any] = {}
+    result: dict[str, str] = {}
     result["role"] = "ai" if "app_id" in slack_msg else "human"
     text = strip_msg(slack_msg["text"])
-    if result["role"] == "ai":
-        result["content"] = dict(answer=text, quotes=[], context=[])
-    else:
-        result["content"] = text
+    result["content"] = text
     return result
 
 
