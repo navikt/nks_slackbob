@@ -1,0 +1,17 @@
+[project]
+name = "nks-slackbob"
+version = "0.1.0"
+description = "Slackbot for NKS Kunnskapsbase Basert Språkmodell"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.6.2",
+    "pre-commit>=3.8.0",
+]
