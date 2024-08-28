@@ -25,11 +25,7 @@ repos:
         types: [python]
         args: [--strict, --ignore-missing-imports]
         additional_dependencies: [
-          'fastapi',
-          'langchain',
-          'langchain_core',
-          'langchain_openai',
           'pydantic',
           'pydantic_settings',
-          'pytest',
+          'slack-bolt',
         ]
