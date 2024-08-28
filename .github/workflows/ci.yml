@@ -20,6 +20,9 @@ jobs:
               uses: pre-commit/action@v3.0.1
     test:
         runs-on: ubuntu-latest
+        env:
+            NKS_SLACKBOB_BOT_TOKEN: "not_a_secret"
+            NKS_SLACKBOB_APP_TOKEN: "not_a_secret"
         steps:
             - uses: actions/checkout@v4
             - name: Set up uv
