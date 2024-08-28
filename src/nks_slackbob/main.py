@@ -11,7 +11,7 @@ from slack_sdk import WebClient
 
 from . import settings
 from .expressions import WORKING_ON_ANSWER
-from .utils import USERNAME_PATTERN, convert_msg, is_bob_alive, strip_msg
+from .utils import USERNAME_PATTERN, convert_msg, format_slack, is_bob_alive, strip_msg
 
 API_URL = httpx.URL(str(settings.kbs_endpoint))
 """API URL til KBS systemet"""
@@ -71,22 +71,8 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
         )
         update_msg(text="Kunnskapsbasen svarer ikke :shrug:")
         return
-    data = reply.json()
-    context = {}
-    for cont in data["context"]:
-        context[cont["article_id"]] = cont
-    cites = "\n\n".join(
-        [
-            f"> {cite['text']}\n"
-            f"(_{context[cite['article_id']]['title'] or 'Uten tittel'}_ / "
-            f"_{cite['section'] or 'Uten seksjon'}_)"
-            for cite in data["quotes"]
-        ]
-    )
-    text = f"{data['answer']}\n{cites}"
-    # Hvis vi kommer ned hit så vet vi at systemet svarte på spørsmålet som
-    # forventet
-    update_msg(text=text)
+    # Hent respons fra KBS og formater det for Slack
+    update_msg(text=format_slack(reply.json()))
 
 
 @app.event("app_mention")

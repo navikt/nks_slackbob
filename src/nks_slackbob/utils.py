@@ -1,6 +1,7 @@
 """Hjelpefunksjoner som gjør livet enklere i møte med Slack."""
 
 import re
+from typing import Any
 
 import httpx
 
@@ -39,6 +40,22 @@ def convert_msg(slack_msg: dict[str, str]) -> dict[str, str]:
     text = strip_msg(slack_msg["text"])
     result["content"] = text
     return result
+
+
+def format_slack(data: dict[str, Any]) -> str:
+    """Formater en melding fra KBS til en streng som kan brukes på Slack."""
+    text: str = data["answer"]["text"]
+    cites = "\n\n".join(
+        [
+            f"> {cite['text']}\n"
+            f"(_{cite['title'] or 'Uten tittel'}_ / "
+            f"_{cite['section'] or 'Uten seksjon'}_)"
+            for cite in data["answer"]["citations"]
+        ]
+    )
+    if cites:
+        text += f"\n{cites}"
+    return text
 
 
 def is_bob_alive(url: httpx.URL) -> bool:
