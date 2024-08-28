@@ -11,7 +11,7 @@ USERNAME_PATTERN: re.Pattern[str] = re.compile(r"<@([A-Z0-9]+)>")
 EMOJI_PATTERN: re.Pattern[str] = re.compile(r":([a-zA-Z0-9_-]+):")
 """Mønster for å kjenne igjen Slack emoji"""
 
-QUOTE_PATTERN: re.Pattern[str] = re.compile(r"^>(.*)")
+QUOTE_PATTERN: re.Pattern[str] = re.compile(r"^>(.*)", re.MULTILINE)
 """Mønster for å kjenne igjen et Slack sitat"""
 
 QUOTE_LINK_PATTERN: re.Pattern[str] = re.compile(r"\(_(.*)_\)")
