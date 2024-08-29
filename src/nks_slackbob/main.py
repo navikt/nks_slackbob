@@ -103,10 +103,21 @@ def slack_mention(event: dict[str, str], client: WebClient) -> None:
 @app.event("message")
 def thread_reply(event: dict[str, str], client: WebClient) -> None:
     """Håndter svar i tråder boten har besvart."""
-    # Sjekk om det er en direkte melding til boten
-    is_direct = event["channel_type"] == "im"
+    # Det første vi sjekker er om meldingen inneholder en '@bot' til oss, slike
+    # meldinger blir besvart av 'slack_mention' over og hvis vi ikke stopper
+    # prosessering her blir det to svar i tråden
+    for username in re.findall(USERNAME_PATTERN, event["text"]):
+        user = client.users_info(user=username)
+        if user.get("user")["profile"].get("api_app_id") == settings.id:  # type: ignore[index]
+            return
+    # Sjekk om det er en direkte melding til boten, hvis det er det OG det ikke
+    # er en tråd så svarer vi direkte
+    if event["channel_type"] == "im" and "thread_ts" not in event:
+        app.logger.info("Direkte melding fra bruker %s", event["user"])
+        chat(client, event)
+        return
     # Sjekk at meldingen er et svar i en tråd
-    if "thread_ts" not in event and not is_direct:
+    if "thread_ts" not in event:
         return
     # Hvis det er svar i en tråd så sjekker vi om boten er involvert i tråden,
     # hvis ikke så svarer vi ikke
@@ -120,24 +131,15 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
             if "app_id" in msg
         ]
     )
-    if not we_replied and not is_direct:
+    if not we_replied:
         return
-    # Det siste vi sjekker er om meldingen inneholder en '@bot' til oss, slike
-    # meldinger blir besvart av 'slack_mention' over og hvis vi ikke stopper
-    # prosessering her blir det to svar i tråden
-    for username in re.findall(USERNAME_PATTERN, event["text"]):
-        user = client.users_info(user=username)
-        if user.get("user")["profile"].get("api_app_id") == settings.id:  # type: ignore[index]
-            return
-    if not is_direct:
-        app.logger.info(
-            "Oppfølgningsspørsmål i tråd %s (kanal: %s), fra bruker %s",
-            event["ts"],
-            event["channel"],
-            event["user"],
-        )
-    else:
-        app.logger.info("Direkte melding fra bruker %s", event["user"])
+    # Kommer vi hit så er det et spørsmål i en tråd som vi burde prøve å besvare
+    app.logger.info(
+        "Oppfølgningsspørsmål i tråd %s (kanal: %s), fra bruker %s",
+        event["ts"],
+        event["channel"],
+        event["user"],
+    )
     chat(client, event)
 
 
