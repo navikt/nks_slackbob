@@ -3,7 +3,7 @@ name = "nks-slackbob"
 version = "0.1.0"
 description = "Slackbot for NKS Kunnskapsbase Basert Språkmodell"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.8.2",
     "pydantic-settings>=2.4.0",
