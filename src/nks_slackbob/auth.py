@@ -1,5 +1,6 @@
 """Autentisering i Entra ID på NAIS."""
 
+import dataclasses
 import datetime
 from typing import Annotated, Any, cast
 
@@ -32,7 +33,7 @@ class OAuth2Flow:
     scope: ApiUrl
     """Scope for autentiseringstoken"""
 
-    _token: dict[str, Any] = {}
+    _token: dict[str, Any] = dataclasses.field(default_factory=dict)
     """Privat lager for autentiseringstoken"""
 
     def _acquire_token(self) -> dict[str, Any]:
@@ -40,7 +41,7 @@ class OAuth2Flow:
         data = {
             "client_id": self.client_id,
             "client_secret": self.client_secret.get_secret_value(),
-            "scope": self.scope,
+            "scope": str(self.scope),
             "grant_type": "client_credentials",
         }
         response = httpx.post(str(self.token_endpoint), data=data).raise_for_status()
