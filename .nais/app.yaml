@@ -23,7 +23,8 @@ spec:
       rules:
         - application: nks-kbs
       external:
-        - host: hooks.slack.com
+        # Følgende regler trengs for å snakke med Slack, litt vanskelig å si
+        # hvorfor Slack er så vanskelig å snakke med fra NAIS
         - host: slack.com
         - ipv4: 18.134.215.41
         - ipv4: 18.159.197.225
