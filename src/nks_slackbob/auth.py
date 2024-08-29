@@ -64,7 +64,7 @@ class OAuth2Flow:
         """
         if self.last_update is None:
             return None
-        return self.last_update + cast(datetime.timedelta, self._token["expires_in"])
+        return self.last_update + datetime.timedelta(seconds=self._token["expires_in"])
 
     def __call__(self) -> SecretStr:
         """Hent autentiseringstoken.
