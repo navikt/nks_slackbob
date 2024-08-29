@@ -6,10 +6,12 @@ import random
 import re
 
 import httpx
+from pydantic_core import Url
 from slack_bolt import App
 from slack_sdk import WebClient
 
 from . import settings
+from .auth import OAuth2Flow
 from .expressions import WORKING_ON_ANSWER
 from .utils import USERNAME_PATTERN, convert_msg, format_slack, is_bob_alive, strip_msg
 
@@ -18,6 +20,16 @@ API_URL = httpx.URL(str(settings.kbs_endpoint))
 
 # Set opp logging med Slack
 logging.basicConfig(level=logging.INFO)
+
+# Set opp autentisering
+auth = OAuth2Flow(
+    client_id=settings.client_id,
+    client_secret=settings.client_secret,
+    token_endpoint=settings.auth_token_endpoint,
+    scope=Url(
+        f"api://{settings.nais_environment}.nks-aiautomatisering.nks-kbs/.default"
+    ),
+)
 
 # Sett opp Slack app for å koble til Slack
 app = App(token=settings.bot_token.get_secret_value())
@@ -53,6 +65,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     try:
         reply = httpx.post(
             API_URL.copy_with(path="/api/v1/chat"),
+            headers={"Authorization": f"Bearer {auth.get_token().get_secret_value()}"},
             json={"history": history, "question": question},
             timeout=settings.answer_timeout,
         )
