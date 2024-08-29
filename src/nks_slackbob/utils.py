@@ -51,9 +51,9 @@ def format_slack(data: dict[str, Any]) -> str:
     cites = "\n\n".join(
         [
             f"> {cite['text'].replace('\n', ' ')}\n"
-            f"(_[{cite['title'] or 'Uten tittel'} / "
-            f"{cite['section'] or 'Uten seksjon'}]"
-            f"({context_map[cite['article']]['metadata']['KnowledgeArticle_QuartoUrl']})_)"
+            f"(_<{context_map[cite['article']]['metadata']['KnowledgeArticle_QuartoUrl']}|"
+            f"{cite['title'] or 'Uten tittel'} / "
+            f"{cite['section'] or 'Uten seksjon'}>_)"
             for cite in data["answer"]["citations"]
         ]
     )
