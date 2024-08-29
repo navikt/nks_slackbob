@@ -13,9 +13,20 @@ def context() -> list[dict[str, Any]]:
     return [
         {
             "content": "Artikkel om dagpenger eller noe",
-            "metadata": {"Title": "Dagpenger"},
+            "metadata": {
+                "Title": "Dagpenger",
+                "KnowledgeArticleId": "id1",
+                "KnowledgeArticle_QuartoUrl": "https://localhost/id1",
+            },
         },
-        {"content": "Sykepenger er best!", "metadata": {"Title": "Sykepenger"}},
+        {
+            "content": "Sykepenger er best!",
+            "metadata": {
+                "Title": "Sykepenger",
+                "KnowledgeArticleId": "id2",
+                "KnowledgeArticle_QuartoUrl": "https://localhost/id2",
+            },
+        },
     ]
 
 
@@ -40,7 +51,7 @@ def answer_cites(context: list[dict[str, Any]]) -> dict[str, Any]:
             "citations": [
                 {
                     "text": "Helt uten mening!",
-                    "article": "article1",
+                    "article": "id1",
                     "title": "Dagpenger",
                     "section": "Til bruker",
                 }
@@ -61,6 +72,7 @@ def test_format_cite(answer_cites: dict[str, Any]) -> None:
     formatted = format_slack(answer_cites)
     assert formatted.startswith(answer_cites["answer"]["text"])
     assert ">" in formatted
+    assert "https://localhost/id1" in formatted
 
 
 def test_strip_no_cite(answer_no_cites: dict[str, Any]) -> None:
@@ -72,6 +84,21 @@ def test_strip_no_cite(answer_no_cites: dict[str, Any]) -> None:
 
 def test_strip_cite(answer_cites: dict[str, Any]) -> None:
     """Sjekk at å fjerne Slack formatering fungerer som forventet."""
+    formatted = format_slack(answer_cites)
+    stripped = strip_msg(formatted)
+    assert stripped == answer_cites["answer"]["text"]
+
+
+def test_strip_cite2(answer_cites: dict[str, Any]) -> None:
+    """Sjekk at 'strip_msg' klarer å fjerne flere sitater."""
+    answer_cites["answer"]["citations"].append(
+        {
+            "text": "Helt med mening!",
+            "article": "id2",
+            "title": "Sykepenger",
+            "section": "Til bruker",
+        }
+    )
     formatted = format_slack(answer_cites)
     stripped = strip_msg(formatted)
     assert stripped == answer_cites["answer"]["text"]
