@@ -30,7 +30,9 @@ class Settings(BaseSettings):
     """Tidsbegrensning, i sekunder, på hvor lenge vi venter på et svar fra modellen før vi gir opp"""
 
     # Variabler vi trenger for autentisering
-    client_id: str = Field(validation_alias=AliasChoices("azure_app_client_id"))
+    client_id: str = Field(
+        "nks-slackbob", validation_alias=AliasChoices("azure_app_client_id")
+    )
     """Klient ID for applikasjonen - brukes for autentisering"""
 
     client_secret: SecretStr = Field(

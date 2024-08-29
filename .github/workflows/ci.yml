@@ -23,6 +23,7 @@ jobs:
         env:
             NKS_SLACKBOB_BOT_TOKEN: "not_a_secret"
             NKS_SLACKBOB_APP_TOKEN: "not_a_secret"
+            AZURE_APP_CLIENT_SECRET: "not_a_secret"
         steps:
             - uses: actions/checkout@v4
             - name: Set up uv
