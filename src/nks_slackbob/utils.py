@@ -45,11 +45,15 @@ def convert_msg(slack_msg: dict[str, str]) -> dict[str, str]:
 def format_slack(data: dict[str, Any]) -> str:
     """Formater en melding fra KBS til en streng som kan brukes på Slack."""
     text: str = data["answer"]["text"]
+    context_map = {
+        ctx["metadata"]["KnowledgeArticleId"]: ctx for ctx in data["context"]
+    }
     cites = "\n\n".join(
         [
             f"> {cite['text'].replace('\n', ' ')}\n"
-            f"(_{cite['title'] or 'Uten tittel'}_ / "
-            f"_{cite['section'] or 'Uten seksjon'}_)"
+            f"(_[{cite['title'] or 'Uten tittel'} / "
+            f"{cite['section'] or 'Uten seksjon'}]"
+            f"({context_map[cite['article']]['metadata']['KnowledgeArticle_QuartoUrl']})_)"
             for cite in data["answer"]["citations"]
         ]
     )
