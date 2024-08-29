@@ -47,7 +47,7 @@ def format_slack(data: dict[str, Any]) -> str:
     text: str = data["answer"]["text"]
     cites = "\n\n".join(
         [
-            f"> {cite['text']}\n"
+            f"> {cite['text'].replace("\n", "")}\n"
             f"(_{cite['title'] or 'Uten tittel'}_ / "
             f"_{cite['section'] or 'Uten seksjon'}_)"
             for cite in data["answer"]["citations"]
