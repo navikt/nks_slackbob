@@ -27,7 +27,7 @@ auth = OAuth2Flow(
     client_secret=settings.client_secret,
     token_endpoint=settings.auth_token_endpoint,
     scope=Url(
-        f"api://{settings.nais_environment}.nks-aiautomatisering.nks-kbs/.default"
+        f"api://{settings.nais_environment!s}.nks-aiautomatisering.nks-kbs/.default"
     ),
 )
 
