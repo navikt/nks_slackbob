@@ -103,8 +103,10 @@ def slack_mention(event: dict[str, str], client: WebClient) -> None:
 @app.event("message")
 def thread_reply(event: dict[str, str], client: WebClient) -> None:
     """Håndter svar i tråder boten har besvart."""
+    # Sjekk om det er en direkte melding til boten
+    is_direct = event["channel_type"] == "im"
     # Sjekk at meldingen er et svar i en tråd
-    if "thread_ts" not in event:
+    if "thread_ts" not in event and not is_direct:
         return
     # Hvis det er svar i en tråd så sjekker vi om boten er involvert i tråden,
     # hvis ikke så svarer vi ikke
@@ -118,7 +120,7 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
             if "app_id" in msg
         ]
     )
-    if not we_replied:
+    if not we_replied and not is_direct:
         return
     # Det siste vi sjekker er om meldingen inneholder en '@bot' til oss, slike
     # meldinger blir besvart av 'slack_mention' over og hvis vi ikke stopper
@@ -127,12 +129,15 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
         user = client.users_info(user=username)
         if user.get("user")["profile"].get("api_app_id") == settings.id:  # type: ignore[index]
             return
-    app.logger.info(
-        "Oppfølgningsspørsmål i tråd %s (kanal: %s), fra bruker %s",
-        event["ts"],
-        event["channel"],
-        event["user"],
-    )
+    if not is_direct:
+        app.logger.info(
+            "Oppfølgningsspørsmål i tråd %s (kanal: %s), fra bruker %s",
+            event["ts"],
+            event["channel"],
+            event["user"],
+        )
+    else:
+        app.logger.info("Direkte melding fra bruker %s", event["user"])
     chat(client, event)
 
 
