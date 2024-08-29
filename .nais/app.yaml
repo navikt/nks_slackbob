@@ -23,7 +23,7 @@ spec:
       rules:
         - application: nks-kbs
       external:
-        - host: slack.com
+        - host: hooks.slack.com
   azure:
     application:
       tenant: nav.no # Gjør at man kan logge på med vanlig konto i dev-gcp
