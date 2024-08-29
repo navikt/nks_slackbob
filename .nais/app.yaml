@@ -1,0 +1,30 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+
+metadata:
+  labels:
+    team: nks-aiautomatisering
+  name: nks-slackbob
+  namespace: nks-aiautomatisering
+spec:
+  envFrom:
+    - secret: slackbot
+  image: "{{ image }}"
+  port: 8080
+  replicas:
+    max: 1
+    min: 1
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  accessPolicy:
+    outbound:
+      rules:
+        - application: nks-kbs
+      external:
+        - host: slack.com
+  azure:
+    application:
+      tenant: nav.no # Gjør at man kan logge på med vanlig konto i dev-gcp
+      enabled: true
