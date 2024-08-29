@@ -100,6 +100,35 @@ def slack_mention(event: dict[str, str], client: WebClient) -> None:
     chat(client, event)
 
 
+@app.event("message.im")
+def direct_message(event: dict[str, str], client: WebClient) -> None:
+    """Håndter direkte meldinger til boten."""
+    # Først sjekk om meldingen inneholder en @bot referanse, hvis så tilfellet
+    # så håndterer `app_mention` over meldingen.
+    for username in re.findall(USERNAME_PATTERN, event["text"]):
+        user = client.users_info(user=username)
+        if user.get("user")["profile"].get("api_app_id") == settings.id:  # type: ignore[index]
+            return
+    # Hvis det er svar i en tråd så sjekker vi om boten er involvert i tråden,
+    # hvis den er det så blir meldingen besvart av `message` under
+    history = client.conversations_replies(
+        channel=event["channel"], ts=event["thread_ts"]
+    )
+    we_replied = any(
+        [
+            msg["app_id"] == settings.id
+            for msg in history.get("messages")  # type: ignore[union-attr]
+            if "app_id" in msg
+        ]
+    )
+    if we_replied:
+        return
+    # Hvis vi kommer hit så burde det bare være denne metoden som håndterer
+    # kallet
+    app.logger.info("Fikk en direkte melding fra bruker %s", event["user"])
+    chat(client, event)
+
+
 @app.event("message")
 def thread_reply(event: dict[str, str], client: WebClient) -> None:
     """Håndter svar i tråder boten har besvart."""
