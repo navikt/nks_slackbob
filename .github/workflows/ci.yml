@@ -15,7 +15,7 @@ jobs:
             - name: Set up Python
               uses: actions/setup-python@v5
               with:
-                python-version: "pyproject.toml"
+                python-version-file: "pyproject.toml"
             - name: Run pre-commit
               uses: pre-commit/action@v3.0.1
     test:
@@ -31,7 +31,7 @@ jobs:
             - name: Set up Python
               uses: actions/setup-python@v5
               with:
-                python-version: "pyproject.toml"
+                python-version-file: "pyproject.toml"
             - name: Install the project
               run: uv sync --frozen --all-extras --dev
             - name: Run tests
