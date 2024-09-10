@@ -19,8 +19,8 @@ spec:
     min: 1
   resources:
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
   accessPolicy:
     outbound:
       rules:
