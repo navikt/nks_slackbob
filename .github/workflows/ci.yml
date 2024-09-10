@@ -15,7 +15,7 @@ jobs:
             - name: Set up Python
               uses: actions/setup-python@v5
               with:
-                python-version: "3.12"
+                python-version: "pyproject.toml"
             - name: Run pre-commit
               uses: pre-commit/action@v3.0.1
     test:
@@ -26,9 +26,13 @@ jobs:
             AZURE_APP_CLIENT_SECRET: "not_a_secret"
         steps:
             - uses: actions/checkout@v4
-            - name: Set up uv
-              run: curl -LsSf https://astral.sh/uv/0.3.5/install.sh | sh
+            - name: Install uv
+              uses: astral-sh/setup-uv@v2
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "pyproject.toml"
             - name: Install the project
               run: uv sync --frozen --all-extras --dev
             - name: Run tests
-              run: uv run pytest -rs
+              run: uv run pytest -rs tests/
