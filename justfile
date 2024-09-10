@@ -9,4 +9,4 @@ lint:
 
 # Kjør tester med PyTest
 test:
-    uv run pytest -rs
+    uv run pytest -rs tests/
