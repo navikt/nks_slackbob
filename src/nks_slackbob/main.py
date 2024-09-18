@@ -103,6 +103,9 @@ def slack_mention(event: dict[str, str], client: WebClient) -> None:
 @app.event("message")
 def thread_reply(event: dict[str, str], client: WebClient) -> None:
     """Håndter svar i tråder boten har besvart."""
+    # Hvis meldingen ikke inneholder noe tekst avbryter vi prosessering
+    if "text" not in event:
+        return
     # Det første vi sjekker er om meldingen inneholder en '@bot' til oss, slike
     # meldinger blir besvart av 'slack_mention' over og hvis vi ikke stopper
     # prosessering her blir det to svar i tråden
