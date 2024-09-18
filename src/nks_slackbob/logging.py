@@ -1,5 +1,7 @@
 """Oppsett for strukturert logging."""
 
+import logging
+
 import structlog
 
 
@@ -16,20 +18,27 @@ def setup_logging() -> None:
         timestamper,
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
-        # Render the final event dict as JSON.
-        structlog.processors.JSONRenderer(),
     ]
     structlog.configure(
-        shared_processors,
-        # `wrapper_class` is the bound logger that you get back from
-        # get_logger(). This one imitates the API of `logging.Logger`.
-        wrapper_class=structlog.stdlib.BoundLogger,
-        # `logger_factory` is used to create wrapped loggers that are used for
-        # OUTPUT. This one returns a `logging.Logger`. The final value (a JSON
-        # string) from the final processor (`JSONRenderer`) will be passed to
-        # the method of the same name as that you've called on the bound logger.
+        processors=shared_processors
+        + [
+            # Prepare event dict for `ProcessorFormatter`.
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
         logger_factory=structlog.stdlib.LoggerFactory(),
-        # Effectively freeze configuration after creating the first bound
-        # logger.
         cache_logger_on_first_use=True,
     )
+    # Oppsett for å overskrive Python sin innebygde logging til å bruke formatet
+    # vi definerte over
+    formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=shared_processors,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            structlog.processors.JSONRenderer(),
+        ],
+    )
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logging.INFO)
