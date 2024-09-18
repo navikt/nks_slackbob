@@ -6,6 +6,7 @@ import random
 import re
 
 import httpx
+import structlog
 from pydantic_core import Url
 from slack_bolt import App
 from slack_sdk import WebClient
@@ -13,12 +14,14 @@ from slack_sdk import WebClient
 from . import settings
 from .auth import OAuth2Flow
 from .expressions import WORKING_ON_ANSWER
+from .logging import setup_logging
 from .utils import USERNAME_PATTERN, convert_msg, format_slack, is_bob_alive, strip_msg
 
 API_URL = httpx.URL(str(settings.kbs_endpoint))
 """API URL til KBS systemet"""
 
 # Set opp logging med Slack
+setup_logging()
 logging.basicConfig(level=logging.INFO)
 
 # Set opp autentisering
@@ -32,7 +35,10 @@ auth = OAuth2Flow(
 )
 
 # Sett opp Slack app for å koble til Slack
-app = App(token=settings.bot_token.get_secret_value())
+app = App(
+    token=settings.bot_token.get_secret_value(),
+    logger=structlog.get_logger("slackbob"),
+)
 
 
 def chat(client: WebClient, event: dict[str, str]) -> None:
@@ -160,17 +166,13 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
 
 def main() -> None:
     """Inngangsporten til Slack boten."""
-    import structlog
     from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-    from .logging import setup_logging
-
-    setup_logging()
     try:
         SocketModeHandler(
             app,
             app_token=settings.app_token.get_secret_value(),
-            logger=structlog.stdlib.get_logger("slackbob"),
+            logger=structlog.get_logger("main"),
         ).start()  # type: ignore[no-untyped-call]
     except KeyboardInterrupt:
         # Ignorer fordi det betyr at vi tester på kommandolinje og trenger ikke
