@@ -77,13 +77,13 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
             json={"history": history, "question": question},
             timeout=settings.answer_timeout,
         )
+        request_id = reply.headers.get("x-request-id")
+        log = log.bind(request_id=request_id)
         if reply.status_code != 200:
-            request_id = reply.headers.get("x-request-id")
             log.error(
                 "KBS svarte ikke som forventet",
                 status_code=reply.status_code,
                 reason=reply.reason_phrase,
-                request_id=request_id,
             )
             update_msg(
                 text=f"Ånei! Noe gikk galt for kunnskapsbasen :scream: (ID: {request_id})"
@@ -96,6 +96,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
         )
         update_msg(text="Kunnskapsbasen svarer ikke :shrug:")
         return
+    log.info("Svarer bruker fra KBS")
     # Hent respons fra KBS og formater det for Slack
     update_msg(text=format_slack(reply.json()))
 
