@@ -39,15 +39,6 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     """Håndter et spørsmål på Slack ved å kalle NKS KBS."""
     # Hent ut samtale historie før vi svarer ut noe
     thread = event.get("thread_ts", event["ts"])
-    log = app.logger.bind(  # type: ignore[attr-defined]
-        channel=event.get("channel"),
-        channel_type=event.get("channel_type"),
-        message_subtype=event.get("subtype"),
-        message_type=event.get("type"),
-        thread=event.get("ts"),
-        thread_ts=event.get("thread_ts"),
-        user=event.get("user"),
-    )
     chat_hist = client.conversations_replies(channel=event["channel"], ts=thread)
     # Start med å svare at vi jobber med et svar til bruker
     temp_msg = client.chat_postMessage(
@@ -65,7 +56,6 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     )
     # Sjekk tidlig om API-et kjører, slik at bruker slipper å vente
     if not is_bob_alive(API_URL):
-        log.error("KBS kjører ikke")
         update_msg(text="Kunnskapsbasen kjører ikke akkurat nå :construction:")
         return
     # Hent ut chat historikk og spørsmål fra brukeren
@@ -80,18 +70,17 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
             timeout=settings.answer_timeout,
         )
         if reply.status_code != 200:
-            log.error(
-                "KBS svarte med feilmelding",
-                status_code=reply.status_code,
-                reason=reply.reason_phrase,
-                headers=reply.headers,
+            app.logger.error(
+                "Mottok status %s og begrunnelse %s",
+                reply.status_code,
+                reply.reason_phrase,
             )
             update_msg(text="Ånei! Noe gikk galt for kunnskapsbasen :scream:")
             return
     except httpx.ReadTimeout:
-        log.error(
-            "Spørring mot kunnskapbasen tok for lang tid",
-            timeout=settings.answer_timeout,
+        app.logger.error(
+            "Spørring mot kunnskapbasen tok for lang tid, ventet %.1f sekunder!",
+            settings.answer_timeout,
         )
         update_msg(text="Kunnskapsbasen svarer ikke :shrug:")
         return
@@ -102,12 +91,11 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
 @app.event("app_mention")
 def slack_mention(event: dict[str, str], client: WebClient) -> None:
     """Håndter @bot meldinger på Slack."""
-    app.logger.info(  # type: ignore[call-arg]
-        "App mention",
-        channel=event.get("channel"),
-        channel_type=event.get("channel_type"),
-        thread=event.get("ts"),
-        user=event.get("user"),
+    app.logger.info(
+        "App mention fra bruker %s, i kanal %s, med tråd %s",
+        event["user"],
+        event["channel"],
+        event["ts"],
     )
     chat(client, event)
 
@@ -115,14 +103,6 @@ def slack_mention(event: dict[str, str], client: WebClient) -> None:
 @app.event("message")
 def thread_reply(event: dict[str, str], client: WebClient) -> None:
     """Håndter svar i tråder boten har besvart."""
-    log = app.logger.bind(  # type: ignore[attr-defined]
-        channel=event.get("channel"),
-        channel_type=event.get("channel_type"),
-        message_subtype=event.get("subtype"),
-        message_type=event.get("type"),
-        thread=event.get("ts"),
-        user=event.get("user"),
-    )
     # Det første vi sjekker er om meldingen inneholder en '@bot' til oss, slike
     # meldinger blir besvart av 'slack_mention' over og hvis vi ikke stopper
     # prosessering her blir det to svar i tråden
@@ -133,7 +113,7 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
     # Sjekk om det er en direkte melding til boten, hvis det er det OG det ikke
     # er en tråd så svarer vi direkte
     if event["channel_type"] == "im" and "thread_ts" not in event:
-        log.info("Direkte melding fra bruker")
+        app.logger.info("Direkte melding fra bruker %s", event["user"])
         chat(client, event)
         return
     # Sjekk at meldingen er et svar i en tråd
@@ -154,24 +134,21 @@ def thread_reply(event: dict[str, str], client: WebClient) -> None:
     if not we_replied:
         return
     # Kommer vi hit så er det et spørsmål i en tråd som vi burde prøve å besvare
-    log.info("Oppfølgningsspørsmål")
+    app.logger.info(
+        "Oppfølgningsspørsmål i tråd %s (kanal: %s), fra bruker %s",
+        event["ts"],
+        event["channel"],
+        event["user"],
+    )
     chat(client, event)
 
 
 def main() -> None:
     """Inngangsporten til Slack boten."""
-    import structlog
     from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-    from .logging import setup_logging
-
-    setup_logging()
     try:
-        SocketModeHandler(
-            app,
-            app_token=settings.app_token.get_secret_value(),
-            logger=structlog.stdlib.get_logger("slackbob"),
-        ).start()  # type: ignore[no-untyped-call]
+        SocketModeHandler(app, app_token=settings.app_token.get_secret_value()).start()  # type: ignore[no-untyped-call]
     except KeyboardInterrupt:
         # Ignorer fordi det betyr at vi tester på kommandolinje og trenger ikke
         # beskjed at noe feilet
