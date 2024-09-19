@@ -27,7 +27,5 @@ COPY --from=builder --chown=python:python /python /python
 COPY --from=builder --chown=app:app /app /app
 # Eksponer pakker fra virtueltmiljø
 ENV PATH="/app/.venv/bin:$PATH"
-# Fjern inngang for å ikke automatisk kjøre CMD med Python
-ENTRYPOINT [ ]
 # Server applikasjonen som default for Docker bildet
 CMD ["nks-slackbob"]
