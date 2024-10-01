@@ -1,6 +1,7 @@
 """Applikasjonsoppsett for Slack bot-en."""
 
 import functools
+import json
 import random
 import re
 
@@ -69,26 +70,33 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     # Hent ut chat historikk og spørsmål fra brukeren
     history = [convert_msg(msg) for msg in chat_hist.get("messages")[:-1]]  # type: ignore[index]
     question = strip_msg(event["text"])
+    reply = {}
     # Send spørsmål til NKS KBS
     try:
-        reply = httpx.post(
-            API_URL.copy_with(path="/api/v1/chat"),
+        with httpx.stream(
+            "POST",
+            API_URL.copy_with(path="/api/v1/stream/chat"),
             headers={"Authorization": f"Bearer {auth.get_token().get_secret_value()}"},
             json={"history": history, "question": question},
             timeout=settings.answer_timeout,
-        )
-        request_id = reply.headers.get("x-request-id")
-        log = log.bind(request_id=request_id)
-        if reply.status_code != 200:
-            log.error(
-                "KBS svarte ikke som forventet",
-                status_code=reply.status_code,
-                reason=reply.reason_phrase,
-            )
-            update_msg(
-                text=f"Ånei! Noe gikk galt for kunnskapsbasen :scream: (ID: {request_id})"
-            )
-            return
+        ) as r:
+            request_id = r.headers.get("x-request-id")
+            log = log.bind(request_id=request_id)
+            if r.status_code != 200:
+                log.error(
+                    "KBS svarte ikke som forventet",
+                    status_code=r.status_code,
+                    reason=r.reason_phrase,
+                )
+                update_msg(
+                    text=f"Ånei! Noe gikk galt for kunnskapsbasen :scream: (ID: {request_id})"
+                )
+                return
+            for line in r.iter_lines():
+                if line.startswith("data: "):
+                    _, data = line.split(" ", maxsplit=1)
+                    reply = json.loads(data)
+                    update_msg(text=format_slack(reply))
     except httpx.ReadTimeout:
         log.error(
             "Spørring mot kunnskapbasen tok for lang tid",
@@ -96,9 +104,15 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
         )
         update_msg(text="Kunnskapsbasen svarer ikke :shrug:")
         return
+    except json.decoder.JSONDecodeError as e:
+        log.error(
+            "Klarte ikke å dekode JSON svar fra KBS", kbs_data=data, exception=str(e)
+        )
+        update_msg(text="Kunnskapsbasen snakker i tunger :ghost:")
+        return
     log.info("Svarer bruker fra KBS")
     # Hent respons fra KBS og formater det for Slack
-    update_msg(text=format_slack(reply.json()))
+    update_msg(text=format_slack(reply))
 
 
 @app.event("app_mention")
