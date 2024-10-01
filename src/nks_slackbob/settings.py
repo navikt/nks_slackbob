@@ -1,5 +1,7 @@
 """Innstillinger for prosjektet."""
 
+from datetime import timedelta
+
 from pydantic import AliasChoices, AnyHttpUrl, Field, SecretStr
 from pydantic_core import Url
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,6 +30,9 @@ class Settings(BaseSettings):
 
     answer_timeout: float = 60.0
     """Tidsbegrensning, i sekunder, på hvor lenge vi venter på et svar fra modellen før vi gir opp"""
+
+    update_rate_limit: timedelta = timedelta(seconds=3.0)
+    """Antall sekunder mellom hver oppdatering av `chat.update`"""
 
     # Variabler vi trenger for autentisering
     client_id: str = Field(
