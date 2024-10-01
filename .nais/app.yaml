@@ -26,9 +26,18 @@ spec:
       rules:
         - application: nks-kbs
       external:
-        - host: slack.com
-        - host: hooks.slack.com
+        # Liste med host hentet: https://nav-it.slack.com/help/urls
+        - host: a.slack-edge.com
         - host: api.slack.com
+        - host: app.slack.com
+        - host: b.slack-edge.com
+        - host: ca.slack-edge.com
+        - host: edgeapi.slack.com
+        - host: hooks.slack.com
+        - host: slack.com
+        - host: slackb.com
+        - host: wss-backup.slack.com
+        - host: wss-mobile.slack.com
         - host: wss-primary.slack.com
   azure:
     application:
