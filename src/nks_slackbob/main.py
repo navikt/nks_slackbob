@@ -1,5 +1,6 @@
 """Applikasjonsoppsett for Slack bot-en."""
 
+import datetime
 import functools
 import json
 import random
@@ -92,11 +93,19 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
                     text=f"Ånei! Noe gikk galt for kunnskapsbasen :scream: (ID: {request_id})"
                 )
                 return
+            # Brukes for å rate-limit oppdateringer til Slack. Ved for hyppig
+            # oppdatering feiler Slack å oppdatere meldinger
+            last_update = datetime.datetime.now()
             for line in r.iter_lines():
                 if line.startswith("data: "):
                     _, data = line.split(" ", maxsplit=1)
                     reply = json.loads(data)
-                    if reply["answer"].get("text", None):
+                    now = datetime.datetime.now()
+                    if (
+                        reply["answer"].get("text", None)
+                        and now - last_update >= settings.update_rate_limit
+                    ):
+                        last_update = now
                         update_msg(text=format_slack(reply))
     except httpx.ReadTimeout:
         log.error(
