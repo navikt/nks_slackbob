@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     answer_timeout: float = 60.0
     """Tidsbegrensning, i sekunder, på hvor lenge vi venter på et svar fra modellen før vi gir opp"""
 
-    update_rate_limit: timedelta = timedelta(seconds=3.0)
+    update_rate_limit: timedelta = timedelta(seconds=1.2)
     """Antall sekunder mellom hver oppdatering av `chat.update`"""
 
     # Variabler vi trenger for autentisering
