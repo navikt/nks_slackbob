@@ -96,6 +96,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
             # Brukes for å rate-limit oppdateringer til Slack. Ved for hyppig
             # oppdatering feiler Slack å oppdatere meldinger
             last_update = datetime.datetime.now()
+            log.info("Strømmer svar til bruker")
             for line in r.iter_lines():
                 if line.startswith("data: "):
                     _, data = line.split(" ", maxsplit=1)
