@@ -96,7 +96,8 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
                 if line.startswith("data: "):
                     _, data = line.split(" ", maxsplit=1)
                     reply = json.loads(data)
-                    update_msg(text=format_slack(reply))
+                    if reply["answer"].get("text", None):
+                        update_msg(text=format_slack(reply))
     except httpx.ReadTimeout:
         log.error(
             "Spørring mot kunnskapbasen tok for lang tid",
