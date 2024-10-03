@@ -7,10 +7,9 @@ metadata:
   name: nks-slackbob
   namespace: nks-aiautomatisering
   annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "20"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
-    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
 spec:
   envFrom:
     - secret: slackbot
