@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from nks_slackbob.utils import format_slack, strip_msg
+from nks_slackbob.utils import strip_msg
 
 
 @pytest.fixture
@@ -59,49 +59,6 @@ def answer_cites(context: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "context": context,
     }
-
-
-def test_format_no_cite(answer_no_cites: dict[str, Any]) -> None:
-    """Sjekk at KBS melding uten sitering formateres riktig."""
-    formatted = format_slack(answer_no_cites)
-    assert formatted == answer_no_cites["answer"]["text"]
-
-
-def test_format_cite(answer_cites: dict[str, Any]) -> None:
-    """Sjekk at KBS melding med sitering formateres riktig."""
-    formatted = format_slack(answer_cites)
-    assert formatted.startswith(answer_cites["answer"]["text"])
-    assert ">" in formatted
-    assert "https://localhost/id1" in formatted
-
-
-def test_strip_no_cite(answer_no_cites: dict[str, Any]) -> None:
-    """Sjekk at å fjerne Slack formatering fungerer som forventet."""
-    formatted = format_slack(answer_no_cites)
-    stripped = strip_msg(formatted)
-    assert stripped == answer_no_cites["answer"]["text"]
-
-
-def test_strip_cite(answer_cites: dict[str, Any]) -> None:
-    """Sjekk at å fjerne Slack formatering fungerer som forventet."""
-    formatted = format_slack(answer_cites)
-    stripped = strip_msg(formatted)
-    assert stripped == answer_cites["answer"]["text"]
-
-
-def test_strip_cite2(answer_cites: dict[str, Any]) -> None:
-    """Sjekk at 'strip_msg' klarer å fjerne flere sitater."""
-    answer_cites["answer"]["citations"].append(
-        {
-            "text": "Helt med mening!",
-            "article": "id2",
-            "title": "Sykepenger",
-            "section": "Til bruker",
-        }
-    )
-    formatted = format_slack(answer_cites)
-    stripped = strip_msg(formatted)
-    assert stripped == answer_cites["answer"]["text"]
 
 
 def test_strip_mention() -> None:

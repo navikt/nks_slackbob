@@ -33,33 +33,16 @@ def strip_msg(msg: str) -> str:
     return msg.strip()
 
 
-def convert_msg(slack_msg: dict[str, str]) -> dict[str, str]:
+def convert_msg(slack_msg: dict[str, Any]) -> dict[str, str]:
     """Hjelpemetode som tar inn en Slack melding og konverterer til NKS KBS format."""
     result: dict[str, str] = {}
-    result["role"] = "ai" if "app_id" in slack_msg else "human"
-    text = strip_msg(slack_msg["text"])
-    result["content"] = text
+    if "app_id" in slack_msg:
+        result["role"] = "ai"
+        result["content"] = slack_msg["blocks"][0]["text"]["text"]
+    else:
+        result["role"] = "human"
+        result["content"] = strip_msg(slack_msg["text"])
     return result
-
-
-def format_slack(data: dict[str, Any]) -> str:
-    """Formater en melding fra KBS til en streng som kan brukes på Slack."""
-    text: str = data["answer"]["text"]
-    context_map = {
-        ctx["metadata"]["KnowledgeArticleId"]: ctx for ctx in data["context"]
-    }
-    cites = "\n\n".join(
-        [
-            f"> {cite['text'].replace('\n', ' ')}\n"
-            f"(_<{context_map[cite['article']]['metadata']['KnowledgeArticle_QuartoUrl']}|"
-            f"{cite['title'] or 'Uten tittel'} / "
-            f"{cite['section'] or 'Uten seksjon'}>_)"
-            for cite in data["answer"]["citations"]
-        ]
-    )
-    if cites:
-        text += f"\n{cites}"
-    return text
 
 
 def is_bob_alive(url: httpx.URL) -> bool:
