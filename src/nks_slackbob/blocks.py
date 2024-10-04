@@ -7,9 +7,9 @@ def message_blocks(msg: dict[str, Any]) -> list[dict[str, Any]]:
     """Formater et svar fra KBS med Slack Block-er."""
     blocks: list[dict[str, Any]] = []
     blocks.append(answer_block(msg))
-    citations = context_block(msg)
-    if citations["elements"]:
-        blocks.append(citations)
+    context = context_block(msg)
+    if context["elements"]:
+        blocks.append(context)
     return blocks
 
 
