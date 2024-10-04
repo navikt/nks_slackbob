@@ -14,9 +14,10 @@ from slack_sdk import WebClient
 
 from . import settings
 from .auth import OAuth2Flow
+from .blocks import message_block
 from .expressions import WORKING_ON_ANSWER
 from .logging import setup_logging
-from .utils import USERNAME_PATTERN, convert_msg, format_slack, is_bob_alive, strip_msg
+from .utils import USERNAME_PATTERN, convert_msg, is_bob_alive, strip_msg
 
 API_URL = httpx.URL(str(settings.kbs_endpoint))
 """API URL til KBS systemet"""
@@ -65,7 +66,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     )
     # Sjekk tidlig om API-et kjører, slik at bruker slipper å vente
     if not is_bob_alive(API_URL):
-        log.info("'/is_alive' svarte ikke på KBS")
+        log.info("'/is_alive' endepunktet til KBS-en svarte ikke")
         update_msg(text="Kunnskapsbasen kjører ikke akkurat nå :construction:")
         return
     # Hent ut chat historikk og spørsmål fra brukeren
@@ -107,7 +108,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
                         and now - last_update >= settings.update_rate_limit
                     ):
                         last_update = now
-                        update_msg(text=format_slack(reply))
+                        update_msg(blocks=message_block(reply))
     except httpx.ReadTimeout:
         log.error(
             "Spørring mot kunnskapbasen tok for lang tid",
@@ -123,7 +124,7 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
         return
     log.info("Svarer bruker fra KBS")
     # Hent respons fra KBS og formater det for Slack
-    update_msg(text=format_slack(reply))
+    update_msg(blocks=message_block(reply))
 
 
 @app.event("app_mention")
