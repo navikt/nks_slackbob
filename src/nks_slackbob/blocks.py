@@ -39,12 +39,9 @@ def context_block(msg: dict[str, Any]) -> dict[str, Any]:
 def cite_block(citation: dict[str, str], doc: dict[str, Any]) -> dict[str, Any]:
     """Formater en enkelt sitering som en Slack Block."""
     return {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": (
-                f"*<{doc['metadata']['KnowledgeArticle_QuartoUrl']}|{citation['title']}>*"
-                f"\n_{citation['text']}_"
-            ),
-        },
+        "type": "mrkdwn",
+        "text": (
+            f"*<{doc['metadata']['KnowledgeArticle_QuartoUrl']}|{citation['title']}>*"
+            f"\n_{citation['text']}_"
+        ),
     }
