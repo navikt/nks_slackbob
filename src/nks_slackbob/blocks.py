@@ -3,7 +3,7 @@
 from typing import Any
 
 
-def message_block(msg: dict[str, Any]) -> list[dict[str, Any]]:
+def message_blocks(msg: dict[str, Any]) -> list[dict[str, Any]]:
     """Formater et svar fra KBS med Slack Block-er."""
     blocks: list[dict[str, Any]] = []
     blocks.append(answer_block(msg))
