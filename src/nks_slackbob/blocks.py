@@ -44,6 +44,6 @@ def cite_block(citation: dict[str, str], doc: dict[str, Any]) -> dict[str, Any]:
         "type": "mrkdwn",
         "text": (
             f"*<{doc['metadata']['KnowledgeArticle_QuartoUrl']}|{citation['title']}>*"
-            f"\n_{citation['text']}_"
+            f"\n_{markdown_to_slack(citation['text'])}_"
         ),
     }
