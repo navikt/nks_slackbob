@@ -17,13 +17,13 @@ QUOTE_PATTERN: re.Pattern[str] = re.compile(r"^>(.*)", re.MULTILINE)
 QUOTE_LINK_PATTERN: re.Pattern[str] = re.compile(r"\(_(.*)_\)")
 """Mønster for å kjenne igjen en Slack sitat forklaring/lenke"""
 
-MARKDOWN_LINK_PATTERN: re.Pattern[str] = re.compile(r"\[(.+)\]\((.+)\)")
+MARKDOWN_LINK_PATTERN: re.Pattern[str] = re.compile(r"\[(.+?)\]\((.+?)\)")
 """Mønster for å kjenne igjen en Markdown lenke"""
 
-KBS_BOLD_PATTERN: re.Pattern[str] = re.compile(r"\*+([\w\d ]+)\*+")
+KBS_BOLD_PATTERN: re.Pattern[str] = re.compile(r"\*+([\w\d -]+)\*+")
 """KBS-en har en tendens til å legge på flere ** for å markere bold"""
 
-KBS_ITALIC_PATTERN: re.Pattern[str] = re.compile(r"\_+([\w\d ]+)\_+")
+KBS_ITALIC_PATTERN: re.Pattern[str] = re.compile(r"\_+([\w\d -]+)\_+")
 """KBS-en har en tendens til å legge på flere __ for å markere italic"""
 
 
