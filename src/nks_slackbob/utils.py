@@ -32,9 +32,9 @@ def markdown_to_slack(msg: str) -> str:
     # Konverter lenker
     msg = re.sub(MARKDOWN_LINK_PATTERN, "<\2|\1>", msg)
     # Konverter bold
-    msg = re.sub(KBS_BOLD_PATTERN, "*\1*", msg)
+    # msg = re.sub(KBS_BOLD_PATTERN, "*\1*", msg)
     # Konverter italic
-    msg = re.sub(KBS_ITALIC_PATTERN, "_\1_", msg)
+    # msg = re.sub(KBS_ITALIC_PATTERN, "_\1_", msg)
     return msg
 
 
