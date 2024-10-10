@@ -30,11 +30,11 @@ KBS_ITALIC_PATTERN: re.Pattern[str] = re.compile(r"\_+([\w\d -]+?)\_+")
 def markdown_to_slack(msg: str) -> str:
     """Konverter tekst i Markdown til Slack sitt mrkdwn format."""
     # Konverter lenker
-    msg = re.sub(MARKDOWN_LINK_PATTERN, r"\<\g<2>|\g<1>\>", msg)
+    msg = re.sub(MARKDOWN_LINK_PATTERN, r"<\g<2>|\g<1>>", msg)
     # Konverter bold
-    msg = re.sub(KBS_BOLD_PATTERN, r"\*\g<1>\*", msg)
+    msg = re.sub(KBS_BOLD_PATTERN, r"*\g<1>*", msg)
     # Konverter italic
-    msg = re.sub(KBS_ITALIC_PATTERN, r"\_\g<1>\_", msg)
+    msg = re.sub(KBS_ITALIC_PATTERN, r"_\g<1>_", msg)
     return msg
 
 
