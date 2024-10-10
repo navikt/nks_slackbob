@@ -2,6 +2,8 @@
 
 from typing import Any
 
+from .utils import markdown_to_slack
+
 
 def message_blocks(msg: dict[str, Any]) -> list[dict[str, Any]]:
     """Formater et svar fra KBS med Slack Block-er."""
@@ -17,7 +19,7 @@ def answer_block(msg: dict[str, Any]) -> dict[str, Any]:
     """Formater selve svaret fra KBS som en Slack Block."""
     return {
         "type": "section",
-        "text": {"type": "mrkdwn", "text": msg["answer"]["text"]},
+        "text": {"type": "mrkdwn", "text": markdown_to_slack(msg["answer"]["text"])},
     }
 
 
