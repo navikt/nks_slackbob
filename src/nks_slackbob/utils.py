@@ -20,21 +20,21 @@ QUOTE_LINK_PATTERN: re.Pattern[str] = re.compile(r"\(_(.*)_\)")
 MARKDOWN_LINK_PATTERN: re.Pattern[str] = re.compile(r"\[(.+?)\]\((.+?)\)")
 """Mønster for å kjenne igjen en Markdown lenke"""
 
-KBS_BOLD_PATTERN: re.Pattern[str] = re.compile(r"\*+([\w\d -]+)\*+")
+KBS_BOLD_PATTERN: re.Pattern[str] = re.compile(r"\*+([\w\d -]+?)\*+")
 """KBS-en har en tendens til å legge på flere ** for å markere bold"""
 
-KBS_ITALIC_PATTERN: re.Pattern[str] = re.compile(r"\_+([\w\d -]+)\_+")
+KBS_ITALIC_PATTERN: re.Pattern[str] = re.compile(r"\_+([\w\d -]+?)\_+")
 """KBS-en har en tendens til å legge på flere __ for å markere italic"""
 
 
 def markdown_to_slack(msg: str) -> str:
     """Konverter tekst i Markdown til Slack sitt mrkdwn format."""
     # Konverter lenker
-    msg = re.sub(MARKDOWN_LINK_PATTERN, "<\2|\1>", msg)
+    msg = re.sub(MARKDOWN_LINK_PATTERN, r"\<\g<2>|\g<1>\>", msg)
     # Konverter bold
-    # msg = re.sub(KBS_BOLD_PATTERN, "*\1*", msg)
+    msg = re.sub(KBS_BOLD_PATTERN, r"\*\g<1>\*", msg)
     # Konverter italic
-    # msg = re.sub(KBS_ITALIC_PATTERN, "_\1_", msg)
+    msg = re.sub(KBS_ITALIC_PATTERN, r"\_\g<1>\_", msg)
     return msg
 
 
