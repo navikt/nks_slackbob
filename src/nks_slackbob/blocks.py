@@ -20,6 +20,7 @@ def answer_block(msg: dict[str, Any]) -> dict[str, Any]:
     return {
         "type": "section",
         "text": {"type": "mrkdwn", "text": markdown_to_slack(msg["answer"]["text"])},
+        "expand": True,
     }
 
 
