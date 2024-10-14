@@ -17,7 +17,13 @@ from .auth import OAuth2Flow
 from .blocks import message_blocks
 from .expressions import WORKING_ON_ANSWER
 from .logging import setup_logging
-from .utils import USERNAME_PATTERN, convert_msg, is_bob_alive, strip_msg
+from .utils import (
+    USERNAME_PATTERN,
+    convert_msg,
+    is_bob_alive,
+    markdown_to_slack,
+    strip_msg,
+)
 
 API_URL = httpx.URL(str(settings.kbs_endpoint))
 """API URL til KBS systemet"""
@@ -108,7 +114,10 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
                         and now - last_update >= settings.update_rate_limit
                     ):
                         last_update = now
-                        update_msg(blocks=message_blocks(reply))
+                        update_msg(
+                            text=markdown_to_slack(reply["answer"]["text"]),
+                            blocks=message_blocks(reply),
+                        )
     except httpx.ReadTimeout:
         log.error(
             "Spørring mot kunnskapbasen tok for lang tid",
@@ -124,7 +133,9 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
         return
     log.info("Svarer bruker fra KBS")
     # Hent respons fra KBS og formater det for Slack
-    update_msg(blocks=message_blocks(reply))
+    update_msg(
+        text=markdown_to_slack(reply["answer"]["text"]), blocks=message_blocks(reply)
+    )
 
 
 @app.event("app_mention")
