@@ -75,9 +75,12 @@ def format_citation_url(
         Ny URL med tekstfragment som uthever tekst
     """
     cite_text = citation.get("text", "")
-    if not cite_text:
+    # Hvis det ikke er sitering eller den er for kort så gjør vi ikke noe
+    if not cite_text and len(cite_text) < 2:
         return base_url
     cite_words = cite_text.replace("\n", " ").split(" ")
-    start_fragment = " ".join(cite_words[0:num_word])
-    end_fragment = " ".join(cite_words[-1 - num_word : -1])
+    # Pass på at det ikke er overlapp i korte siteringer
+    num_word = min(num_word, len(cite_words) // 2)
+    start_fragment = " ".join(cite_words[:num_word])
+    end_fragment = " ".join(cite_words[-num_word:])
     return base_url.copy_with(fragment=f":~:text={start_fragment},{end_fragment}")
