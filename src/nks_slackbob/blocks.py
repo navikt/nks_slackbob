@@ -1,5 +1,6 @@
 """Formatering for Slack Block-er."""
 
+import urllib.parse
 from typing import Any
 
 import httpx
@@ -86,4 +87,6 @@ def format_citation_url(
         return base_url
     start_fragment = " ".join(cite_words[:num_word])
     end_fragment = " ".join(cite_words[-num_word:])
-    return base_url.copy_with(fragment=f":~:text={start_fragment},{end_fragment}")
+    return base_url.copy_with(
+        fragment=f":~:text={urllib.parse.quote(start_fragment)},{urllib.parse.quote(end_fragment)}"
+    )
