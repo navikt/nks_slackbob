@@ -58,7 +58,10 @@ def convert_msg(slack_msg: dict[str, Any]) -> dict[str, str]:
     result: dict[str, str] = {}
     if "app_id" in slack_msg:
         result["role"] = "ai"
-        result["content"] = slack_msg["blocks"][0]["text"]["text"]
+        result["content"] = strip_msg(slack_msg.get("text", ""))
+        # Kan ikke anta at "blocks" alltid er i svaret fra Bob
+        if "blocks" in slack_msg and slack_msg["blocks"]:
+            result["content"] = slack_msg["blocks"][0]["text"]["text"]
     else:
         result["role"] = "human"
         result["content"] = strip_msg(slack_msg["text"])
