@@ -81,8 +81,8 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     question = strip_msg(event["text"])
     reply = {}
     # Send spørsmål til NKS KBS
+    request_id = uuid.uuid4().hex
     try:
-        request_id = uuid.uuid4().hex
         log = log.bind(request_id=request_id)
         with httpx.stream(
             "POST",
@@ -127,13 +127,13 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
             "Spørring mot kunnskapbasen tok for lang tid",
             timeout=settings.answer_timeout,
         )
-        update_msg(text="Kunnskapsbasen svarer ikke :shrug:")
+        update_msg(text=f"Kunnskapsbasen svarer ikke (ID: {request_id}) :shrug:")
         return
     except json.decoder.JSONDecodeError as e:
         log.error(
             "Klarte ikke å dekode JSON svar fra KBS", kbs_data=data, exception=str(e)
         )
-        update_msg(text="Kunnskapsbasen snakker i tunger :ghost:")
+        update_msg(text=f"Kunnskapsbasen snakker i tunger (ID: {request_id}) :ghost:")
         return
     log.info("Svarer bruker fra KBS")
     # Hent respons fra KBS og formater det for Slack
