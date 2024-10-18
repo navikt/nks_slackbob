@@ -5,6 +5,7 @@ import functools
 import json
 import random
 import re
+import uuid
 
 import httpx
 import structlog
@@ -81,15 +82,18 @@ def chat(client: WebClient, event: dict[str, str]) -> None:
     reply = {}
     # Send spørsmål til NKS KBS
     try:
+        request_id = uuid.uuid4().hex
+        log = log.bind(request_id=request_id)
         with httpx.stream(
             "POST",
             API_URL.copy_with(path="/api/v1/stream/chat"),
-            headers={"Authorization": f"Bearer {auth.get_token().get_secret_value()}"},
+            headers={
+                "Authorization": f"Bearer {auth.get_token().get_secret_value()}",
+                "X-Request-ID": request_id,
+            },
             json={"history": history, "question": question},
             timeout=settings.answer_timeout,
         ) as r:
-            request_id = r.headers.get("x-request-id")
-            log = log.bind(request_id=request_id)
             if r.status_code != 200:
                 log.error(
                     "KBS svarte ikke som forventet",
